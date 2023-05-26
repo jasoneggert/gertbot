@@ -5,11 +5,12 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const { Configuration, OpenAIApi } = require("openai");
 const port = 3001;
-
-app.use(cors()); // Allow all CORS requests
-// Configure body-parser middleware
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+// Allow all CORS requests
+app.use(cors()); 
+// Configure body-parser middleware for parsing application/json
+app.use(bodyParser.json()); 
+ // for parsing application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
 require("dotenv").config();
 
 const configuration = new Configuration({
@@ -19,8 +20,8 @@ const openai = new OpenAIApi(configuration);
 // Generate Response
 app.post("/generate", async (req, res) => {
   console.log("starting response generation");
-  const newQuestion = req.body.newQuestion;
-  const model = req?.body?.model;
+  const prompt = req.body.prompt;
+  const model = req.body.model;
   const response = await openai.createChatCompletion({
     model: model,
     temperature: 0.5,
@@ -37,12 +38,12 @@ app.post("/generate", async (req, res) => {
         " Respond in markdown append keywords relevant to your response to the end of your response prepending each key word with a # symbol",
           
       },
-      { role: "user", content: newQuestion },
+      { role: "user", content: prompt },
     ],
   });
   console.log("openai comm succesful");
   if (response) {
-    res.send(response?.data?.choices[0]?.message?.content);
+    res.send(response.data.choices[0].message.content);
   } else {
 
     res.status(500).send("Error occurred while generating response");

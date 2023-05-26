@@ -8,12 +8,12 @@ const App = () => {
   const [model, setModel] = useState("gpt-3.5-turbo");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const talkToGertBot = async (question, setNewQuestion) => {
+  const talkToGertBot = async (prompt, setNewQuestion) => {
     setIsGenerating(true);
 
     try {
       const response = await axios.post("http://localhost:3001/generate", {
-        question,
+        prompt,
         model,
       });
 
@@ -22,13 +22,13 @@ const App = () => {
         return;
       }
 
-      setStoredValues([{ question, answer: response.data }, ...storedValues]);
+      setStoredValues([{ prompt, answer: response.data }, ...storedValues]);
 
-      saveResponse({ prompt: question, response: response.data });
+      saveResponse({ prompt, response: response.data });
       setNewQuestion("");
     } catch (error) {
       console.error(error);
-      alert("Error generating response");
+      alert("Error generating response - check console", error);
     } finally {
       setIsGenerating(false);
     }
