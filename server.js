@@ -3,41 +3,75 @@ const fs = require("fs");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
+const { Configuration, OpenAIApi } = require("openai");
 const port = 3001;
+
 app.use(cors()); // Allow all CORS requests
 // Configure body-parser middleware
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-// Define the endpoint to append data to the CSV file
-app.post("/append-data", (req, res) => {
-  const newData = req.body; // Assuming the new data is sent in the request body
-  // Function to escape commas and double quotes in the field
-  const escapeField = (field) => {
-    let escapedField = field.replace(/(\r\n|\n|\r)/gm, " ").replace(/"/g, '""'); // Remove Line breaks and Escape double quotes by doubling them
-    if (escapedField.includes(",") || escapedField.includes('"')) {
-      escapedField = `"${escapedField}"`; // Wrap the field in double quotes if it contains commas or double quotes
+require("dotenv").config();
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+// Generate Response
+app.post("/generate", async (req, res) => {
+  console.log("starting response generation");
+  const newQuestion = req.body.newQuestion;
+  const model = req?.body?.model;
+  const response = await openai.createChatCompletion({
+    model: model,
+    temperature: 0.5,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a helpful assistant focused on assistanting with code, product managment, writing, and art",
+          
+      },
+      {
+        role: "system",
+        content:
+        " Respond in markdown append keywords relevant to your response to the end of your response prepending each key word with a # symbol",
+          
+      },
+      { role: "user", content: newQuestion },
+    ],
+  });
+  console.log("openai comm succesful");
+  if (response) {
+    res.send(response?.data?.choices[0]?.message?.content);
+  } else {
+
+    res.status(500).send("Error occurred while generating response");
+  }
+});
+
+app.post("/write-file", (req, res) => {
+  const newData = req?.body; 
+  const prompt = newData?.prompt;
+  const response = newData?.response;
+  const date = newData?.date;
+  const truncateString =(str, num) => {
+    if (str?.length <= num) {
+      return str
     }
-    return escapedField;
-  };
-
-  // Escape commas and double quotes in the CSV fields
-  const prompt = escapeField(newData.prompt);
-  const response = escapeField(newData.response);
-  const date = escapeField(newData.date);
-  // Convert the data to CSV format
-  const csvData = `"${prompt}",${response},"${date}"\n`;
-
-  console.log("sssss", csvData);
-  //Append the data to the CSV file
-  fs.appendFile("data.csv", csvData, (err) => {
+    return str.slice(0, num)
+  }
+  const content =`date: ${truncateString(date, 9)}
+  prompt: ${prompt}
+  response: ${response}
+  `
+  const markdownNotePath = `/home/gert/personalVault/08_GertBot/${truncateString(prompt, 44)}.md`;
+  fs.writeFile(markdownNotePath, content, (err) => {
     if (err) {
       console.error(err);
-      res
-        .status(500)
-        .send("Error occurred while appending data to the CSV file");
+      res.status(500).send("Error occurred while creating Markdown file");
     } else {
-      res.send("Data appended to the CSV file successfully");
+      console.log("saved to csv and obsidian")
+      res.send("saved to csv and obsidian");
     }
   });
 });
