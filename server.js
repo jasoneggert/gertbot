@@ -64,7 +64,7 @@ app.post("/write-file", (req, res) => {
   prompt: ${prompt}
   response: ${response}
   `
-  const markdownNotePath = `/home/gert/personalVault/08_GertBot/${truncateString(prompt, 44)}.md`;
+const markdownNotePath = `${process.env.LOCAL_STORAGE_PATH}${truncateString(prompt, 44)}.md`;
   fs.writeFile(markdownNotePath, content, (err) => {
     if (err) {
       console.error(err);
