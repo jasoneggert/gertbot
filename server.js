@@ -32,13 +32,7 @@ app.post("/generate", async (req, res) => {
           "You are a helpful assistant focused on assistanting with code, product managment, writing, and art",
           
       },
-      {
-        role: "system",
-        content:
-        " Respond in markdown append keywords relevant to your response to the end of your response prepending each key word with a # symbol",
-          
-      },
-      { role: "user", content: prompt },
+      { role: "user", content: `${prompt} Format the response using markdown Append keywords relevant to your response to the end of your response prepending each key word with a # sign` },
     ],
   });
   console.log("openai comm succesful");
@@ -61,9 +55,12 @@ app.post("/write-file", (req, res) => {
     }
     return str.slice(0, num)
   }
-  const content =`date: ${truncateString(date, 9)}
-  prompt: ${prompt}
-  response: ${response}
+  const content =`## Date:
+  ${truncateString(date, 9)}
+  ## Prompt: 
+  ${prompt}
+  ## Response: 
+  ${response}
   `
 const markdownNotePath = `${process.env.LOCAL_STORAGE_PATH}${truncateString(prompt, 44)}.md`;
   fs.writeFile(markdownNotePath, content, (err) => {
