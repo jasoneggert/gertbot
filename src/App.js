@@ -27,8 +27,8 @@ const App = () => {
       saveResponse({ prompt, response: response.data });
       setNewQuestion("");
     } catch (error) {
-      console.error(error);
-      alert("Error generating response - check console", error);
+      console.error(error.message);
+      alert("error generating response see console", error.message.reason);
     } finally {
       setIsGenerating(false);
     }
@@ -47,15 +47,15 @@ const App = () => {
       );
       return response;
     } catch (error) {
-      console.error(error);
-      alert("error see console");
+      console.error(error.message);
+      alert("error saving response walking tour see console", error.message.reason);
     }
   };
 
   return (
     <div>
       <div className="header-section">
-        <h1>GertBot 🤖</h1>
+        <h1>VernBot 🤖</h1>
       </div>
 
       <select

@@ -18,9 +18,15 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 // Generate Response
+
+const replaceWords = (str) => {
+  return str.replace(/Vault Platform/g, 'Platform')
+            .replace(/Veeva/g, 'Life-science software company')
+            .replace(/Vault/g, 'Application');
+}
 app.post("/generate", async (req, res) => {
   console.log("starting response generation");
-  const prompt = req.body.prompt;
+  const prompt = replaceWords(req.body.prompt);
   const model = req.body.model;
   const response = await openai.createChatCompletion({
     model: model,
@@ -29,10 +35,10 @@ app.post("/generate", async (req, res) => {
       {
         role: "system",
         content:
-          "You are a helpful assistant focused on assistanting with code, product managment, writing, and art",
+          "You are a helpful assistant focused on assistanting with code, product managment documents, and general business writing for a large software compnay",
           
       },
-      { role: "user", content: `${prompt} Format the response using markdown Append keywords relevant to your response to the end of your response prepending each key word with a # sign` },
+      { role: "user", content: `${prompt} Format the response using markdown. Append keywords relevant to your response to the end of the response. Prepend each key word with a #/hastag` },
     ],
   });
   console.log("openai comm succesful");
