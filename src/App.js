@@ -22,9 +22,7 @@ const App = () => {
         return;
       }
 
-      setStoredValues([{ prompt, answer: response.data }, ...storedValues]);
-
-      saveResponse({ prompt, response: response.data });
+      setStoredValues([{ prompt, answer: response.data.response }, ...storedValues]);
       setNewQuestion("");
     } catch (error) {
       console.error(error.message);
@@ -34,23 +32,6 @@ const App = () => {
     }
   };
 
-  const saveResponse = async ({ prompt, response }) => {
-    const formData = {
-      prompt,
-      response,
-      date: new Date(),
-    };
-    try {
-      const response = await axios.post(
-        "http://localhost:3001/write-file",
-        formData
-      );
-      return response;
-    } catch (error) {
-      console.error(error.message);
-      alert("error saving response walking tour see console", error.message.reason);
-    }
-  };
 
   return (
     <div>
