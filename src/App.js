@@ -35,10 +35,9 @@ const App = () => {
         return;
       }
 
-      setStoredValues([{ prompt, answer: response.data }, ...storedValues]);
-
-      saveResponse({ prompt, response: response.data });
+      setStoredValues([{ prompt, answer: response.data.response }, ...storedValues]);
       setNewQuestion("");
+      saveResponse({ prompt, response: response.data.response });
     } catch (error) {
       console.error(error.message);
       alert("error generating response see console", error.message.reason);
