@@ -19,24 +19,49 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 // Generate Response
 
+
+/**
+ * Replaces words in a string based on environment variables.
+ *
+ * @param {string} str - The string to replace words in.
+ * @return {string} The modified string with replaced words.
+ */
 const replaceWords = (str) => {
-  return str.replace(/Vault Platform/g, 'Platform')
-            .replace(/Veeva/g, 'Life-science software company')
-            .replace(/Vault/g, 'Application');
+  Object.keys(process.env).forEach((key) => {
+    console.log('key', key);
+    if (key.startsWith('REPLACE_WORD_')) {
+    
+      const index = key.split('_')[2];
+      const valueKey = `REPLACE_VALUE_${index}`;
+      if (process.env[valueKey]) {
+        str = str.replace(new RegExp(process.env[key], 'g'), process.env[valueKey]);
+      }
+    }
+  });
+  console.log(str);
+  return str;
 }
+
+replaceWords('Veeva Vault platform')
+
 app.post("/generate", async (req, res) => {
   console.log("starting response generation");
   const prompt = replaceWords(req.body.prompt);
+  console.log('prompt', prompt);
   const model = req.body.model;
   const response = await openai.createChatCompletion({
     model: model,
-    temperature: 0.5,
+    temperature: 0.2,
     messages: [
       {
         role: "system",
         content:
           "You are a helpful assistant focused on assistanting with code, product managment documents, and general business writing for a large software compnay",
-          
+      },
+      {
+        role: "system",
+        content:
+          "You use a straighfoward and confident tone in your writing using the active voice when possible.  You avoid using uneeded adjectives and adverbs.",
       },
       { role: "user", content: `${prompt} Format the response using markdown. Append keywords relevant to your response to the end of the response. Prepend each key word with a #/hastag` },
     ],
@@ -61,14 +86,16 @@ app.post("/write-file", (req, res) => {
     }
     return str.slice(0, num)
   }
-  const content =`## Date:
-  ${truncateString(date, 9)}
-  ## Prompt: 
-  ${prompt}
-  ## Response: 
-  ${response}
-  `
-const markdownNotePath = `${process.env.LOCAL_STORAGE_PATH}${truncateString(prompt, 44)}.md`;
+  //weird formatting so there are no unintended spaces in markdown ouput
+  const content =
+`## Date:
+${truncateString(date, 9)}
+## Prompt: 
+${prompt}
+## Response: 
+${response}
+`
+  const markdownNotePath = `${process.env.LOCAL_STORAGE_PATH}${Date()}.md`;
   fs.writeFile(markdownNotePath, content, (err) => {
     if (err) {
       console.error(err);
