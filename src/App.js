@@ -2,10 +2,11 @@ import FormSection from "./components/FormSection";
 import AnswerSection from "./components/AnswerSection";
 import { useState } from "react";
 import axios from "axios";
-
 const App = () => {
   const [storedValues, setStoredValues] = useState([]);
   const [model, setModel] = useState("gpt-3.5-turbo");
+  const [format, setFormat] = useState("markdown");
+
   const [isGenerating, setIsGenerating] = useState(false);
 
 /**
@@ -27,6 +28,7 @@ const App = () => {
       const response = await axios.post("http://localhost:3001/generate", {
         prompt,
         model,
+        format
       });
 
       if (!response) {
@@ -35,9 +37,8 @@ const App = () => {
         return;
       }
 
-      setStoredValues([{ prompt, answer: response.data.response }, ...storedValues]);
+      setStoredValues([{ prompt, answer: response.data }, ...storedValues]);
       setNewQuestion("");
-      saveResponse({ prompt, response: response.data.response });
     } catch (error) {
       console.error(error.message);
       alert("error generating response see console", error.message.reason);
@@ -46,36 +47,13 @@ const App = () => {
     }
   };
 
-    /**
-   * Saves a response by sending a POST request to the server.
-   *
-   * @param {Object} param - An object containing the prompt and response.
-   * @param {string} param.prompt - The prompt.
-   * @param {string} param.response - The response.
-   * @returns {Promise} A Promise that resolves to the response from the server.
-   */
-  const saveResponse = async ({ prompt, response }) => {
-    const formData = {
-      prompt,
-      response,
-      date: new Date(),
-    };
-    try {
-      const response = await axios.post(
-        "http://localhost:3001/write-file",
-        formData
-      );
-      return response;
-    } catch (error) {
-      console.error(error.message);
-      alert("error saving response walking tour see console", error.message.reason);
-    }
-  };
+
+
 
   return (
     <div>
       <div className="header-section">
-        <h1>GertBot 🤖</h1>
+        <h1>VernBot 🤖</h1>
       </div>
 
       <select
@@ -86,6 +64,14 @@ const App = () => {
         <option value="gpt-4">gpt-4</option>
       </select>
 
+      <select
+        className="format-select"
+        onChange={(e) => setFormat(e.target.value)}
+      >
+        <option value="markdown">markdown</option>
+        <option value="rich text">rich text</option>
+        <option value="html">html</option>
+      </select>
       {!isGenerating && <FormSection generateResponse={talkToGertBot} />}
       {isGenerating && <h2>Generating</h2>}
       {storedValues.length > 0 && <AnswerSection storedValues={storedValues} />}
