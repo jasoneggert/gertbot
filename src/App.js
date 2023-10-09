@@ -53,7 +53,7 @@ const App = () => {
   return (
     <div>
       <div className="header-section">
-        <h1>VernBot 🤖</h1>
+        <h1>GertBot 🤖</h1>
       </div>
 
       <select
