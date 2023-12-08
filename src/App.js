@@ -5,20 +5,20 @@ import axios from "axios";
 const App = () => {
   const [storedValues, setStoredValues] = useState([]);
   const [model, setModel] = useState("gpt-3.5-turbo");
+  const [type, setType] = useState("gpt-3.5-turbo");
   const [format, setFormat] = useState("markdown");
-
   const [isGenerating, setIsGenerating] = useState(false);
 
-/**
- * Sends a request to the GertBot API to generate a response based on the given prompt.
- * Updates the stored values with the new prompt and response.
- * Saves the response to a database.
- * Clears the new question input.
- * Shows an alert if there is an error generating the response.
- *
- * @param {string} prompt - The prompt to generate a response for.
- * @param {Function} setNewQuestion - The function to clear the new question input.
- */
+  /**
+   * Sends a request to the GertBot API to generate a response based on the given prompt.
+   * Updates the stored values with the new prompt and response.
+   * Saves the response to a database.
+   * Clears the new question input.
+   * Shows an alert if there is an error generating the response.
+   *
+   * @param {string} prompt - The prompt to generate a response for.
+   * @param {Function} setNewQuestion - The function to clear the new question input.
+   */
 
   const talkToGertBot = async (prompt, setNewQuestion) => {
     setIsGenerating(true);
@@ -28,7 +28,8 @@ const App = () => {
       const response = await axios.post("http://localhost:3001/generate", {
         prompt,
         model,
-        format
+        type,
+        format,
       });
 
       if (!response) {
@@ -47,13 +48,10 @@ const App = () => {
     }
   };
 
-
-
-
   return (
     <div>
       <div className="header-section">
-        <h1>VernBot 🤖</h1>
+        <h1>GERTWERKBOT 🤖</h1>
       </div>
 
       <select
@@ -61,7 +59,15 @@ const App = () => {
         onChange={(e) => setModel(e.target.value)}
       >
         <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-        <option value="gpt-4">gpt-4</option>
+        <option value="gpt-4-1106-preview">gpt-4</option>
+      </select>
+
+      <select
+        className="model-select"
+        onChange={(e) => setType(e.target.value)}
+      >
+        <option value="PROD">Product</option>
+        <option value="ENG">Engineering</option>
       </select>
 
       <select
@@ -71,10 +77,17 @@ const App = () => {
         <option value="markdown">markdown</option>
         <option value="rich text">rich text</option>
         <option value="html">html</option>
+        <option value="image">image</option>
       </select>
       {!isGenerating && <FormSection generateResponse={talkToGertBot} />}
       {isGenerating && <h2>Generating</h2>}
-      {storedValues.length > 0 && <AnswerSection storedValues={storedValues} />}
+      {storedValues.length > 0 &&
+        format === "image" &&
+        // eslint-disable-next-line jsx-a11y/alt-text
+        storedValues.map((value, index) => <img src={value.answer} />)}
+      {storedValues.length > 0 && format !== "image" && (
+        <AnswerSection storedValues={storedValues} />
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import ReactMarkdown from 'react-markdown'
+import Markdown from "react-markdown";
 
 const AnswerSection = ({ storedValues }) => {
   const copyText = (text) => {
@@ -14,7 +14,10 @@ const AnswerSection = ({ storedValues }) => {
           return (
             <div className="answer-section" key={index}>
               <div className="question">{value.question}</div>
-              <p className="answer">{value.answer}</p>
+
+              <p className="answer">
+                <Markdown>{value.answer}</Markdown>
+              </p>
               <div className="copy-icon" onClick={() => copyText(value.answer)}>
                 <i className="fa-solid fa-copy"></i>
               </div>
